@@ -73,6 +73,7 @@ fn max_calories_in_list(mut list: impl BufRead) -> Result<u64, Error> {
 
     loop {
         list.read_line(&mut buffer)?;
+        // `pop` is a bug, in case the last elf in the input does not have a line break.
         if buffer.pop().is_none() {
             // End of file (EOF)
             break;
