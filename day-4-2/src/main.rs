@@ -69,7 +69,7 @@
 //! * 2-6,4-8 overlaps in sections 4, 5, and 6.
 //!
 //! So, in this example, the number of overlapping assignment pairs is 4.
-//! 
+//!
 //! **In how many assignment pairs do the ranges overlap?**
 
 use anyhow::Error;
@@ -169,7 +169,7 @@ impl<R> LineStream<R> {
 mod tests {
     use std::io::Cursor;
 
-    use crate::{count_overlapping};
+    use crate::count_overlapping;
 
     #[test]
     fn count_overlapping_pairs() {

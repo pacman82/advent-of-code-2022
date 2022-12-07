@@ -188,9 +188,8 @@ mod tests {
 
     use crate::top_crates;
 
-
     #[test]
-    fn top_crates_example_given (){
+    fn top_crates_example_given() {
         let input = "    \
                 [D]           \n\
             [N] [C]           \n\

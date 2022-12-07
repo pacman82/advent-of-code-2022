@@ -58,7 +58,10 @@
 
 use anyhow::Error;
 use atoi::FromRadix10Checked;
-use std::{io::{BufRead, BufReader}, fs::File};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
 fn main() -> Result<(), Error> {
     let input = BufReader::new(File::open("input.txt")?);
