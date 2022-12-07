@@ -71,9 +71,140 @@
 //!
 //! The Elves just need to know which crate will end up on top of each stack; in this example, the
 //! top crates are C in stack 1, M in stack 2, and Z in stack 3, so you should combine these
-//! together and give the Elves the message CMZ. After the rearrangement procedure completes, what
-//! crate ends up on top of each stack?
+//! together and give the Elves the message CMZ.
+//!
+//! **After the rearrangement procedure completes, what crate ends up on top of each stack?**
 
-fn main() {
-    println!("Hello, world!");
+use std::{
+    cmp::max,
+    fs::File,
+    io::{BufRead, BufReader},
+};
+
+use anyhow::Error;
+use atoi::FromRadix10Checked;
+use lines::LineStream;
+
+mod lines;
+
+fn main() -> Result<(), Error> {
+    let input = BufReader::new(File::open("input.txt")?);
+    let message = top_crates(input);
+    println!("{message}");
+    Ok(())
+}
+
+fn top_crates(input: impl BufRead) -> String {
+    let mut lines = LineStream::new(input);
+    let mut crates = Crates::from_lines(&mut lines);
+    lines.next(); // Jump over empty line
+
+    while let Some(line) = lines.next() {
+        let instruction = Instruction::from_line(line);
+        crates.apply(&instruction);
+        eprintln!("{}", crates.top_crates());
+    }
+
+    crates.top_crates()
+}
+
+struct Crates {
+    buffer: Vec<char>,
+    // Stacks with crates in bottom up order (the lowest crate is first).
+    stacks: Vec<Vec<char>>,
+}
+
+impl Crates {
+    fn from_lines(lines: &mut LineStream<impl BufRead>) -> Self {
+        let mut stacks: Vec<Vec<char>> = Vec::new();
+        while let Some(line) = lines.next() {
+            if !line.contains(&b'[') {
+                break;
+            }
+            for (stack_index, byte_index) in (1..line.len()).step_by(4).enumerate() {
+                match line[byte_index] {
+                    b' ' => (),
+                    item => {
+                        stacks.resize_with(max(stacks.len(), stack_index + 1), Vec::new);
+                        stacks[stack_index].push(item as char)
+                    }
+                }
+            }
+        }
+
+        for stack in &mut stacks {
+            stack.reverse();
+        }
+
+        Self {
+            buffer: Vec::new(),
+            stacks,
+        }
+    }
+
+    fn apply(&mut self, instruction: &Instruction) {
+        self.buffer.clear();
+        let from = &mut self.stacks[instruction.from];
+        let at = from.len() - instruction.amount;
+        self.buffer.extend_from_slice(&from[at..]);
+        self.buffer.reverse();
+        from.resize(at, '\0');
+        let to = &mut self.stacks[instruction.to];
+        to.extend_from_slice(&self.buffer);
+    }
+
+    fn top_crates(&self) -> String {
+        self.stacks
+            .iter()
+            .map(|stack| stack.last().copied().unwrap_or_default())
+            .collect()
+    }
+}
+
+struct Instruction {
+    /// Number of crates to move
+    amount: usize,
+    from: usize,
+    to: usize,
+}
+
+impl Instruction {
+    fn from_line(line: &[u8]) -> Instruction {
+        let (amount, digits_amount) = usize::from_radix_10_checked(&line[5..]);
+        let (from, digits_from) = usize::from_radix_10_checked(&line[(5 + 6 + digits_amount)..]);
+        let (to, _) =
+            usize::from_radix_10_checked(&line[(5 + 6 + 4 + digits_amount + digits_from)..]);
+        Instruction {
+            amount: amount.unwrap(),
+            from: from.unwrap() - 1,
+            to: to.unwrap() - 1,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use crate::top_crates;
+
+
+    #[test]
+    fn top_crates_example_given (){
+        let input = "    \
+                [D]           \n\
+            [N] [C]           \n\
+            [Z] [M] [P]       \n \
+             1   2   3        \n\
+            \n\
+            move 1 from 2 to 1\n\
+            move 3 from 1 to 3\n\
+            move 2 from 2 to 1\n\
+            move 1 from 1 to 2\n\
+        ";
+
+        let actual = top_crates(Cursor::new(input));
+
+        assert_eq!("CMZ", actual);
+    }
 }
