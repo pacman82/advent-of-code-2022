@@ -99,6 +99,13 @@ name = "day-6-2"
 version = "0.1.0"
 
 [[package]]
+name = "day-7-1"
+version = "0.1.0"
+dependencies = [
+ "atoi",
+]
+
+[[package]]
 name = "day_1_2"
 version = "0.1.0"
 dependencies = [
