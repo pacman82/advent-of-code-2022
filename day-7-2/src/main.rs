@@ -127,58 +127,111 @@
 use atoi::FromRadix10Checked;
 use lines::LineStream;
 use std::{
-    fs::File,
-    io::{BufRead, BufReader},
+    fs::{self},
+    io::{BufRead, Cursor},
 };
 
 mod lines;
 
+const TOTAL_SIZE: u64 = 70_000_000;
+const REQUIRED_SIZE: u64 = 30_000_000;
+
 fn main() {
-    let input = BufReader::new(File::open("input.txt").expect("Can not open input file"));
-    let size = accumulated_directory_size(input);
+    let input = fs::read("input.txt").expect("Can not open input file");
+    let size = size_of_directory_to_delete(&input);
     println!("{size}");
 }
 
-fn accumulated_directory_size(input: impl BufRead) -> u64 {
-    let lines = LineStream::new(input);
+fn size_of_directory_to_delete(input: &[u8]) -> u64 {
+    let lines = LineStream::new(Cursor::new(input));
     let mut terminal_output = TerminalOutput::new(lines);
     let first_command = terminal_output.next();
     assert_eq!(Some(Log::ToRoot), first_command);
-    rec_directory_size(&mut terminal_output).accumulated_size
+    let used = fold_directory_tree(&mut terminal_output, TotalSize(0)).0;
+    let free = TOTAL_SIZE - used;
+    let min_size = REQUIRED_SIZE - free;
+    let lines = LineStream::new(Cursor::new(input));
+    let mut terminal_output = TerminalOutput::new(lines);
+    let first_command = terminal_output.next();
+    assert_eq!(Some(Log::ToRoot), first_command);
+    fold_directory_tree(
+        &mut terminal_output,
+        BestDeletionCandidate {
+            min_size,
+            best_size_so_far: u64::MAX,
+            current_dir_size: 0,
+        },
+    )
+    .best_size_so_far
 }
 
-struct AggregatedSize {
-    child_size: u64,
-    accumulated_size: u64,
+pub trait Accumulator: Copy {
+    fn add_file(&mut self, size: u64);
+    fn add_child(&mut self, other: Self);
+    fn finalize_dir(&mut self);
+}
+
+#[derive(Clone, Copy)]
+struct TotalSize(u64);
+
+impl Accumulator for TotalSize {
+    fn add_file(&mut self, size: u64) {
+        self.0 += size
+    }
+
+    fn add_child(&mut self, other: Self) {
+        self.0 += other.0
+    }
+
+    fn finalize_dir(&mut self) {}
+}
+
+#[derive(Clone, Copy)]
+struct BestDeletionCandidate {
+    min_size: u64,
+    best_size_so_far: u64,
+    current_dir_size: u64,
+}
+
+impl Accumulator for BestDeletionCandidate {
+    fn add_file(&mut self, size: u64) {
+        self.current_dir_size += size;
+    }
+
+    fn add_child(&mut self, other: Self) {
+        if other.best_size_so_far < self.best_size_so_far {
+            self.best_size_so_far = other.best_size_so_far;
+        }
+        self.current_dir_size += other.current_dir_size;
+    }
+
+    fn finalize_dir(&mut self) {
+        if self.current_dir_size > self.min_size && self.current_dir_size < self.best_size_so_far {
+            self.best_size_so_far = self.current_dir_size;
+        }
+    }
 }
 
 // The text does not specify this, but the input is a straight forward depth first search, so we
 // won't keep track of any directory names
-fn rec_directory_size(to: &mut TerminalOutput<impl BufRead>) -> AggregatedSize {
+fn fold_directory_tree<Acc: Accumulator>(to: &mut TerminalOutput<impl BufRead>, init: Acc) -> Acc {
     let list = to.next();
     assert_eq!(Some(Log::Ls), list);
-    let mut directory_size = 0;
-    let mut accumulated_size = 0;
+    let mut acc = init;
     while let Some(log) = to.next() {
         match log {
             Log::ToRoot | Log::Ls => panic!("yagni"),
             Log::ToChild => {
-                let agg_size = rec_directory_size(to);
-                directory_size += agg_size.child_size;
-                accumulated_size += agg_size.accumulated_size;
+                let child_acc = fold_directory_tree(to, init);
+                acc.add_child(child_acc);
             }
             Log::ToParent => break,
             Log::Directory => (),
-            Log::File(size) => directory_size += size,
+            Log::File(size) => acc.add_file(size),
         }
     }
-    if directory_size <= 100_000 {
-        accumulated_size += directory_size;
-    }
-    AggregatedSize {
-        child_size: directory_size,
-        accumulated_size,
-    }
+    acc.finalize_dir();
+    acc
 }
 
 struct TerminalOutput<R> {
@@ -236,7 +289,7 @@ impl Log {
 mod tests {
     use std::io::Cursor;
 
-    use crate::{accumulated_directory_size, lines::LineStream, Log, TerminalOutput};
+    use crate::{fold_directory_tree, lines::LineStream, Log, TerminalOutput, TotalSize};
 
     const TERMINAL_OUTPUT: &str = r#"$ cd /
 $ ls
@@ -294,8 +347,13 @@ $ ls
     }
 
     #[test]
-    fn accumulate_directory_sizes() {
-        let input = Cursor::new(TERMINAL_OUTPUT);
-        assert_eq!(95437, accumulated_directory_size(input));
+    fn total_dir_size() {
+        let input = LineStream::new(Cursor::new(TERMINAL_OUTPUT));
+        let mut to = TerminalOutput::new(input);
+        to.next();
+
+        let actual = fold_directory_tree(&mut to, TotalSize(0));
+
+        assert_eq!(48381165, actual.0);
     }
 }
