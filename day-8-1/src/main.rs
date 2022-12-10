@@ -56,7 +56,8 @@ impl Grid {
         let mut tree_heights = Vec::new();
         let first = lines.next().expect("Input must not be empty");
         let width = first.len();
-        let mut extend_grid = |line: &[u8]| tree_heights.extend(line.iter().map(|ascii_digit| *ascii_digit - b'0'));
+        let mut extend_grid =
+            |line: &[u8]| tree_heights.extend(line.iter().map(|ascii_digit| *ascii_digit - b'0'));
         extend_grid(first);
         while let Some(line) = lines.next() {
             assert_eq!(width, line.len());
@@ -85,7 +86,9 @@ impl Grid {
     }
 
     fn num_visible(&self) -> usize {
-        (0..self.tree_heights.len()).filter(|index| self.is_visible(*index)).count()
+        (0..self.tree_heights.len())
+            .filter(|index| self.is_visible(*index))
+            .count()
     }
 }
 
@@ -104,7 +107,6 @@ mod tests {
 
     use crate::Grid;
 
-
     const INPUT: &str = "\
         30373\n\
         25512\n\
@@ -118,9 +120,9 @@ mod tests {
         let input = Cursor::new(INPUT);
 
         let grid = Grid::new(input);
-        let is_visible = |r: usize,c: usize| grid.is_visible(5 * r + c);
+        let is_visible = |r: usize, c: usize| grid.is_visible(5 * r + c);
 
-        assert!(is_visible(1,1));
-        assert!(is_visible(1,2));
+        assert!(is_visible(1, 1));
+        assert!(is_visible(1, 2));
     }
 }
