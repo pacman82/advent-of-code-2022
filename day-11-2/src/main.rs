@@ -234,72 +234,122 @@
 //! monkey business in this situation can be found by multiplying these together: 10605. Figure out
 //! which monkeys to chase by counting how many items they inspect over 20 rounds. What is the level
 //! of monkey business after 20 rounds of stuff-slinging simian shenanigans?
+//!
+//! --- Part Two ---
+//!
+//! You're worried you might not ever get your items back. So worried, in fact, that your relief
+//! that a monkey's inspection didn't damage an item no longer causes your worry level to be divided
+//! by three. Unfortunately, that relief was all that was keeping your worry levels from reaching
+//! ridiculous levels. You'll need to find another way to keep your worry levels manageable. At this
+//! rate, you might be putting up with these monkeys for a very long time - possibly 10000 rounds!
+//! With these new rules, you can still figure out the monkey business after 10000 rounds. Using the
+//! same example above:
+//!
+//! ```
+//! == After round 1 ==
+//! Monkey 0 inspected items 2 times.
+//! Monkey 1 inspected items 4 times.
+//! Monkey 2 inspected items 3 times.
+//! Monkey 3 inspected items 6 times.
+//!
+//! == After round 20 ==
+//! Monkey 0 inspected items 99 times.
+//! Monkey 1 inspected items 97 times.
+//! Monkey 2 inspected items 8 times.
+//! Monkey 3 inspected items 103 times.
+//!
+//! == After round 1000 ==
+//! Monkey 0 inspected items 5204 times.
+//! Monkey 1 inspected items 4792 times.
+//! Monkey 2 inspected items 199 times.
+//! Monkey 3 inspected items 5192 times.
+//!
+//! == After round 2000 ==
+//! Monkey 0 inspected items 10419 times.
+//! Monkey 1 inspected items 9577 times.
+//! Monkey 2 inspected items 392 times.
+//! Monkey 3 inspected items 10391 times.
+//!
+//! == After round 3000 ==
+//! Monkey 0 inspected items 15638 times.
+//! Monkey 1 inspected items 14358 times.
+//! Monkey 2 inspected items 587 times.
+//! Monkey 3 inspected items 15593 times.
+//!
+//! == After round 4000 ==
+//! Monkey 0 inspected items 20858 times.
+//! Monkey 1 inspected items 19138 times.
+//! Monkey 2 inspected items 780 times.
+//! Monkey 3 inspected items 20797 times.
+//!
+//! == After round 5000 ==
+//! Monkey 0 inspected items 26075 times.
+//! Monkey 1 inspected items 23921 times.
+//! Monkey 2 inspected items 974 times.
+//! Monkey 3 inspected items 26000 times.
+//!
+//! == After round 6000 ==
+//! Monkey 0 inspected items 31294 times.
+//! Monkey 1 inspected items 28702 times.
+//! Monkey 2 inspected items 1165 times.
+//! Monkey 3 inspected items 31204 times.
+//!
+//! == After round 7000 ==
+//! Monkey 0 inspected items 36508 times.
+//! Monkey 1 inspected items 33488 times.
+//! Monkey 2 inspected items 1360 times.
+//! Monkey 3 inspected items 36400 times.
+//!
+//! == After round 8000 ==
+//! Monkey 0 inspected items 41728 times.
+//! Monkey 1 inspected items 38268 times.
+//! Monkey 2 inspected items 1553 times.
+//! Monkey 3 inspected items 41606 times.
+//!
+//! == After round 9000 ==
+//! Monkey 0 inspected items 46945 times.
+//! Monkey 1 inspected items 43051 times.
+//! Monkey 2 inspected items 1746 times.
+//! Monkey 3 inspected items 46807 times.
+//!
+//! == After round 10000 ==
+//! Monkey 0 inspected items 52166 times.
+//! Monkey 1 inspected items 47830 times.
+//! Monkey 2 inspected items 1938 times.
+//! Monkey 3 inspected items 52013 times.
+//! ```
+//!
+//! After 10000 rounds, the two most active monkeys inspected items 52166 and 52013 times.
+//! Multiplying these together, the level of monkey business in this situation is now 2713310158.
+//! Worry levels are no longer divided by three after each item is inspected; you'll need to find
+//! another way to keep your worry levels manageable. Starting again from the initial state in your
+//! puzzle input, what is the level of monkey business after 10000 rounds?
 
 fn main() {
-    let tests = Tests::new([7,2,19,3,13,11,5,17]);
     let mut monkeys = [
-        Monkey::new(vec![59, 74, 65, 86], Operation::Multiply(19), [6, 2]),
-        Monkey::new(vec![62, 84, 72, 91, 68, 78, 51], Operation::Add(1), [2, 0]),
-        Monkey::new(vec![78, 84, 96], Operation::Add(8), [6, 5]),
-        Monkey::new(vec![97, 86], Operation::Square, [1, 0]),
-        Monkey::new(vec![50], Operation::Add(6), [3, 1]),
-        Monkey::new(vec![73, 65, 69, 65, 51], Operation::Multiply(17), [4, 7]),
-        Monkey::new(vec![69, 82, 97, 93, 82, 84, 58, 63], Operation::Add(5), [5, 7]),
-        Monkey::new(vec![81, 78, 82, 76, 79, 80], Operation::Add(3), [3, 4]),
+        Monkey::new(vec![59, 74, 65, 86], |x| x * 19, 7, [6, 2]),
+        Monkey::new(vec![62, 84, 72, 91, 68, 78, 51], |x| x + 1, 2, [2, 0]),
+        Monkey::new(vec![78, 84, 96], |x| x + 8, 19, [6, 5]),
+        Monkey::new(vec![97, 86], |x| x * x, 3, [1, 0]),
+        Monkey::new(vec![50], |x| x + 6, 13, [3, 1]),
+        Monkey::new(vec![73, 65, 69, 65, 51], |x| x * 17, 11, [4, 7]),
+        Monkey::new(vec![69, 82, 97, 93, 82, 84, 58, 63], |x| x + 5, 5, [5, 7]),
+        Monkey::new(vec![81, 78, 82, 76, 79, 80], |x| x + 3, 17, [3, 4]),
     ];
-    let mb = monkey_buisness(&mut monkeys, &tests);
+    let mb = monkey_buisness(&mut monkeys);
     println!("{mb}");
 }
 
-#[derive(Clone, Copy)]
-enum Operation {
-    Add(u64),
-    Square,
-    Multiply(u64),
-}
-
-impl Operation {
-    fn execute(&self, input: u64) -> u64 {
-        match self {
-            Operation::Add(summand) => input + summand,
-            Operation::Square => input * input,
-            Operation::Multiply(factor) => input * factor,
-        }
-    }
-}
-
-struct Tests {
-    tests: Vec<u64>,
-    product: u64,
-}
-
-impl Tests {
-    fn new(tests: impl IntoIterator<Item=u64>) -> Self {
-        let tests: Vec<u64> = tests.into_iter().collect();
-        let product = tests.iter().product();
-        Self {
-            tests,
-            product
-        }
-    }
-
-    fn test(&self, monkey_index: usize) -> u64 {
-        self.tests[monkey_index]
-    }
-
-    fn shrink(&self, worry_level: u64) -> u64 {
-        worry_level % self.product
-    }
-}
-
-fn monkey_buisness(monkeys: &mut [Monkey], tests: &Tests) -> u64 {
+fn monkey_buisness(monkeys: &mut [Monkey]) -> u64 {
     let mut items = Vec::new();
+    // Required to prevent overlfowing worry levels
+    let test_product = monkeys.iter().map(Monkey::test).product();
     // Play 20 rounds
     for _round in 0..10_000 {
         // Redistribute items between monkeys
         for monkey_index in 0..monkeys.len() {
             items.clear();
-            items.extend(monkeys[monkey_index].throw_items(tests, monkey_index));
+            items.extend(monkeys[monkey_index].throw_items(test_product));
             for (to, wl) in &items {
                 monkeys[*to].catch(*wl);
             }
@@ -324,18 +374,22 @@ fn monkey_buisness(monkeys: &mut [Monkey], tests: &Tests) -> u64 {
 
 struct Monkey {
     num_inspections: u64,
-    operation: Operation,
+    operation: Box<dyn Fn(u64) -> u64>,
+    test: u64,
     items: Vec<u64>,
     to: [usize; 2],
 }
 
 impl Monkey {
-    fn new(items: Vec<u64>, operation: Operation, to: [usize; 2]) -> Self
+    fn new<O>(items: Vec<u64>, operation: O, test: u64, to: [usize; 2]) -> Self
+    where
+        O: Fn(u64) -> u64 + 'static,
     {
         Self {
             num_inspections: 0,
             items,
-            operation,
+            operation: Box::new(operation),
+            test,
             to,
         }
     }
@@ -345,19 +399,14 @@ impl Monkey {
     }
 
     /// Throw item (To target monkey, with worry level)
-    fn throw_items<'a>(&'a mut self, tests: &'a Tests, index: usize) -> impl Iterator<Item = (usize, u64)> + 'a {
+    fn throw_items(&mut self, test_product: u64) -> impl Iterator<Item = (usize, u64)> + '_ {
         self.num_inspections += self.items.len() as u64;
-        let test = tests.test(index);
-        let operation = self.operation;
+        let operation = &self.operation;
         let to = self.to;
+        let test = self.test;
         self.items.drain(..).map(move |wl| {
-            let new_wl = operation.execute(wl);
-            let new_wl = tests.shrink(new_wl);
-            let to = if new_wl % test == 0 {
-                to[0]
-            } else {
-                to[1]
-            };
+            let new_wl = (operation)(wl) % test_product;
+            let to = if new_wl % test == 0 { to[0] } else { to[1] };
             (to, new_wl)
         })
     }
@@ -365,23 +414,26 @@ impl Monkey {
     fn catch(&mut self, worry_level: u64) {
         self.items.push(worry_level);
     }
+
+    fn test(&self) -> u64 {
+        self.test
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{Monkey, monkey_buisness, Tests, Operation};
+    use crate::{monkey_buisness, Monkey};
 
     #[test]
     fn example_monkey_buisness() {
-        let tests = Tests::new([23, 19, 13, 17]);
         let mut monkeys = [
-            Monkey::new(vec![79, 98], Operation::Multiply(19), [2, 3]),
-            Monkey::new(vec![54, 65, 75, 74], crate::Operation::Add(6), [2, 0]),
-            Monkey::new(vec![79, 60, 97], Operation::Square,  [1,3]),
-            Monkey::new(vec![74], Operation::Add(3), [0,1]),
+            Monkey::new(vec![79, 98], |x| x * 19, 23, [2, 3]),
+            Monkey::new(vec![54, 65, 75, 74], |x| x + 6, 19, [2, 0]),
+            Monkey::new(vec![79, 60, 97], |x| x * x, 13, [1, 3]),
+            Monkey::new(vec![74], |x| x + 3, 17, [0, 1]),
         ];
 
-        let mb = monkey_buisness(&mut monkeys, &tests);
+        let mb = monkey_buisness(&mut monkeys);
 
         assert_eq!(2713310158, mb)
     }
