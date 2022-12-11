@@ -264,11 +264,12 @@
 //! Simulate your complete hypothetical series of motions. How many positions does the tail of the
 //! rope visit at least once?
 
-use std::{
-    fs::File,
-    io::{BufRead, BufReader}, collections::HashSet,
-};
 use atoi::FromRadix10Checked;
+use std::{
+    collections::HashSet,
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
 mod lines;
 
@@ -288,17 +289,21 @@ fn num_visited_by_tail(input: impl BufRead) -> usize {
     world.num_visited_by_tail()
 }
 
-struct World{
+struct World {
     head: (i32, i32),
     tail: (i32, i32),
-    visited: HashSet<(i32,i32)>
+    visited: HashSet<(i32, i32)>,
 }
 
 impl World {
     fn new() -> Self {
         let mut visited = HashSet::new();
-        visited.insert((0,0));
-        Self { head: (0,0), tail: (0,0), visited }
+        visited.insert((0, 0));
+        Self {
+            head: (0, 0),
+            tail: (0, 0),
+            visited,
+        }
     }
 
     fn update(&mut self, inst: Instruction) {
@@ -353,17 +358,20 @@ impl Iterator for Instruction {
 
 #[derive(Clone, Copy, Debug)]
 enum Direction {
-    Up, Down, Left, Right
+    Up,
+    Down,
+    Left,
+    Right,
 }
 
-impl Direction{
+impl Direction {
     fn from_byte(byte: u8) -> Self {
         match byte {
             b'U' => Self::Up,
             b'D' => Self::Down,
             b'R' => Self::Right,
             b'L' => Self::Left,
-            _ => panic!("yagni")
+            _ => panic!("yagni"),
         }
     }
 
@@ -382,7 +390,6 @@ mod tests {
     use std::io::Cursor;
 
     use crate::num_visited_by_tail;
-
 
     const INPUT: &str = "\
         R 4\n\
