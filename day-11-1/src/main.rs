@@ -327,15 +327,15 @@ impl Monkey {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Monkey, monkey_buisness};
+    use crate::{monkey_buisness, Monkey};
 
     #[test]
     fn example_monkey_buisness() {
         let mut monkeys = [
             Monkey::new(vec![79, 98], |x| x * 19, 23, [2, 3]),
             Monkey::new(vec![54, 65, 75, 74], |x| x + 6, 19, [2, 0]),
-            Monkey::new(vec![79, 60, 97], |x| x * x, 13, [1,3]),
-            Monkey::new(vec![74], |x| x + 3, 17, [0,1]),
+            Monkey::new(vec![79, 60, 97], |x| x * x, 13, [1, 3]),
+            Monkey::new(vec![74], |x| x + 3, 17, [0, 1]),
         ];
 
         let mb = monkey_buisness(&mut monkeys);

@@ -353,7 +353,7 @@
 
 use std::{
     fs::File,
-    io::{BufRead, BufReader, Write, stdout},
+    io::{stdout, BufRead, BufReader, Write},
 };
 
 use atoi::FromRadix10SignedChecked;
@@ -373,11 +373,7 @@ fn render(input: impl BufRead, mut crt: impl Write) {
     let mut cc = ClockCircuit::new(instructions);
     for _y in 0..6 {
         for x in 0..40 {
-            let c = if cc.draw_me(x) {
-                b'#'
-            } else {
-                b'.'
-            };
+            let c = if cc.draw_me(x) { b'#' } else { b'.' };
             crt.write_all(&[c]).unwrap();
             cc.tick();
         }
@@ -449,7 +445,7 @@ impl Instruction {
 mod tests {
     use std::io::Cursor;
 
-    use crate::{lines::InputIterator, ClockCircuit, Instruction, render};
+    use crate::{lines::InputIterator, render, ClockCircuit, Instruction};
 
     #[test]
     fn small_program() {
