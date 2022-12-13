@@ -1,0 +1,3 @@
+# Advent of code 2022
+
+My personal code for solving the puzzles at <https://adventofcode.com/>. These are usually several days old, until I start tackling them. However I still have fun catching up. I do not follow any particular strategy. Sometimes I go for clean code, sometimes I go for getting it done fast and sometimes I optimize for a fast runtime. Feel free to read my solutions, but do not expect anything in particular.

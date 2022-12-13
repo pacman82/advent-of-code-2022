@@ -2,13 +2,20 @@ use std::io::BufRead;
 
 pub struct LineStream<R> {
     input: R,
+    /// Number of lines to extract at once
+    num_lines: usize,
     buffer: Vec<u8>,
 }
 
 impl<R> LineStream<R> {
     pub fn new(input: R) -> Self {
+        Self::with_num_lines(input, 1)
+    }
+
+    pub fn with_num_lines(input: R, num_lines: usize) -> Self {
         Self {
             input,
+            num_lines,
             buffer: Vec::new(),
         }
     }
@@ -18,7 +25,9 @@ impl<R> LineStream<R> {
         R: BufRead,
     {
         self.buffer.clear();
-        self.input.read_until(b'\n', &mut self.buffer).ok()?;
+        for _ in 0..self.num_lines {
+            self.input.read_until(b'\n', &mut self.buffer).ok()?;
+        }
         if self.buffer.is_empty() {
             None
         } else {
