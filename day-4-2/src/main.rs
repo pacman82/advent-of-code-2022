@@ -167,8 +167,6 @@ impl<R> LineStream<R> {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::count_overlapping;
 
     #[test]
@@ -182,7 +180,7 @@ mod tests {
             2-6,4-8\n\
         ";
 
-        let actual = count_overlapping(Cursor::new(input));
+        let actual = count_overlapping(input.as_bytes());
 
         assert_eq!(4, actual)
     }

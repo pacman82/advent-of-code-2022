@@ -155,7 +155,7 @@
 use atoi::FromRadix10Checked;
 use common::LineStream;
 use std::{
-    cmp::{min, max},
+    cmp::{max, min},
     fs::File,
     io::{BufRead, BufReader},
 };
@@ -207,7 +207,7 @@ impl Cave {
             let down = pos + MAX_CAVE_WIDTH;
             if self.space[down] == Field::Air {
                 pos = down;
-            } else if self.space[down-1] == Field::Air {
+            } else if self.space[down - 1] == Field::Air {
                 pos = down - 1;
             } else if self.space[down + 1] == Field::Air {
                 pos = down + 1;

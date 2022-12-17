@@ -152,8 +152,6 @@ impl Strategy {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::{accumulate_points, Strategy};
 
     #[test]
@@ -172,7 +170,7 @@ mod tests {
             C Z\n\
         ";
 
-        let actual = accumulate_points(Cursor::new(guide));
+        let actual = accumulate_points(guide.as_bytes());
 
         assert_eq!(15, actual)
     }

@@ -88,7 +88,6 @@ fn calories_top_3(list: impl BufRead) -> u64 {
 #[cfg(test)]
 mod tests {
     use crate::{calories_top_3, elf_calories};
-    use std::io::Cursor;
 
     #[test]
     fn elfs() {
@@ -105,8 +104,8 @@ mod tests {
             8000\n\
             9000\n\
             \n\
-            10000\n";
-        let input = Cursor::new(input);
+            10000\n"
+            .as_bytes();
 
         let calories: Vec<u64> = elf_calories(input).collect();
 
@@ -128,8 +127,8 @@ mod tests {
             8000\n\
             9000\n\
             \n\
-            10000\n";
-        let input = Cursor::new(input);
+            10000\n"
+            .as_bytes();
 
         let actual = calories_top_3(input);
 

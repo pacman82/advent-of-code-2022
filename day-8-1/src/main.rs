@@ -114,21 +114,20 @@ impl Index<(usize, usize)> for Grid {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::Grid;
 
-    const INPUT: &str = "\
+    const INPUT: &[u8] = "\
         30373\n\
         25512\n\
         65332\n\
         33549\n\
         35390\n\
-    ";
+    "
+    .as_bytes();
 
     #[test]
     fn visible_trees() {
-        let input = Cursor::new(INPUT);
+        let input = INPUT;
 
         let grid = Grid::new(input);
         let is_visible = |r: usize, c: usize| grid.is_visible(5 * r + c);

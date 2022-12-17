@@ -151,8 +151,6 @@ impl<R> LineStream<R> {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::{count_redundant, AssignmentPair};
 
     #[test]
@@ -166,7 +164,7 @@ mod tests {
             2-6,4-8\n\
         ";
 
-        let actual = count_redundant(Cursor::new(input));
+        let actual = count_redundant(input.as_bytes());
 
         assert_eq!(2, actual)
     }

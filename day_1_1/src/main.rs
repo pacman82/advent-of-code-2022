@@ -93,7 +93,7 @@ fn max_calories_in_list(mut list: impl BufRead) -> Result<u64, Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::max_calories_in_list; 
+    use crate::max_calories_in_list;
 
     #[test]
     fn example_given_in_instruction() {

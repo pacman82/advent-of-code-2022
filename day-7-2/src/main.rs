@@ -128,7 +128,7 @@ use atoi::FromRadix10Checked;
 use lines::LineStream;
 use std::{
     fs::{self},
-    io::{BufRead, Cursor},
+    io::BufRead,
 };
 
 mod lines;
@@ -143,14 +143,14 @@ fn main() {
 }
 
 fn size_of_directory_to_delete(input: &[u8]) -> u64 {
-    let lines = LineStream::new(Cursor::new(input));
+    let lines = LineStream::new(input);
     let mut terminal_output = TerminalOutput::new(lines);
     let first_command = terminal_output.next();
     assert_eq!(Some(Log::ToRoot), first_command);
     let used = fold_directory_tree(&mut terminal_output, TotalSize(0)).0;
     let free = TOTAL_SIZE - used;
     let min_size = REQUIRED_SIZE - free;
-    let lines = LineStream::new(Cursor::new(input));
+    let lines = LineStream::new(input);
     let mut terminal_output = TerminalOutput::new(lines);
     let first_command = terminal_output.next();
     assert_eq!(Some(Log::ToRoot), first_command);
@@ -287,11 +287,9 @@ impl Log {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::{fold_directory_tree, lines::LineStream, Log, TerminalOutput, TotalSize};
 
-    const TERMINAL_OUTPUT: &str = r#"$ cd /
+    const TERMINAL_OUTPUT: &[u8] = r#"$ cd /
 $ ls
 dir a
 14848514 b.txt
@@ -313,11 +311,12 @@ $ ls
 4060174 j
 8033020 d.log
 5626152 d.ext
-7214296 k"#;
+7214296 k"#
+        .as_bytes();
 
     #[test]
     fn parse_terminal_output() {
-        let input = LineStream::new(Cursor::new(TERMINAL_OUTPUT));
+        let input = LineStream::new(TERMINAL_OUTPUT);
 
         let mut to = TerminalOutput::new(input);
         assert_eq!(Some(Log::ToRoot), to.next());
@@ -348,7 +347,7 @@ $ ls
 
     #[test]
     fn total_dir_size() {
-        let input = LineStream::new(Cursor::new(TERMINAL_OUTPUT));
+        let input = LineStream::new(TERMINAL_OUTPUT);
         let mut to = TerminalOutput::new(input);
         to.next();
 

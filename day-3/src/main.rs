@@ -123,8 +123,6 @@ impl<R> LineStream<R> {
 
 #[cfg(test)]
 mod test {
-    use std::io::Cursor;
-
     use crate::{common, priority, sum_of_priorities};
 
     #[test]
@@ -158,7 +156,7 @@ mod test {
            CrZsJsPPZsGzwwsLwLmpwMDw\n\
         ";
 
-        let actual = sum_of_priorities(Cursor::new(input));
+        let actual = sum_of_priorities(input.as_bytes());
 
         assert_eq!(157, actual)
     }

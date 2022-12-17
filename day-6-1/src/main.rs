@@ -75,27 +75,25 @@ fn start_of_packet(input: impl BufRead) -> Option<usize> {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::start_of_packet;
 
     #[test]
     fn input_too_short() {
-        let input = Cursor::new("123");
-        let pos = start_of_packet(input);
+        let input = "123";
+        let pos = start_of_packet(input.as_bytes());
         assert!(pos.is_none());
     }
 
     #[test]
     fn minimal_input() {
-        let input = Cursor::new("1234");
+        let input = "1234".as_bytes();
         let pos = start_of_packet(input);
         assert_eq!(Some(4), pos);
     }
 
     #[test]
     fn find_start_of_packet() {
-        let sop = |input| start_of_packet(Cursor::new(input)).unwrap();
+        let sop = |input: &str| start_of_packet(input.as_bytes()).unwrap();
         assert_eq!(7, sop("mjqjpqmgbljsphdztnvjfqwrcgsmlb"));
         assert_eq!(5, sop("bvwbjplbgvbhsrlpgdmjqwftvncz"));
         assert_eq!(6, sop("nppdvjthqldpwncqszvftbrmjlhg"));

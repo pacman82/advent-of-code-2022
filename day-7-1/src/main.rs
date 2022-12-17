@@ -212,11 +212,9 @@ impl Log {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::{accumulated_directory_size, lines::LineStream, Log, TerminalOutput};
 
-    const TERMINAL_OUTPUT: &str = r#"$ cd /
+    const TERMINAL_OUTPUT: &[u8] = r#"$ cd /
 $ ls
 dir a
 14848514 b.txt
@@ -238,11 +236,12 @@ $ ls
 4060174 j
 8033020 d.log
 5626152 d.ext
-7214296 k"#;
+7214296 k"#
+        .as_bytes();
 
     #[test]
     fn parse_terminal_output() {
-        let input = LineStream::new(Cursor::new(TERMINAL_OUTPUT));
+        let input = LineStream::new(TERMINAL_OUTPUT);
 
         let mut to = TerminalOutput::new(input);
         assert_eq!(Some(Log::ToRoot), to.next());
@@ -273,7 +272,6 @@ $ ls
 
     #[test]
     fn accumulate_directory_sizes() {
-        let input = Cursor::new(TERMINAL_OUTPUT);
-        assert_eq!(95437, accumulated_directory_size(input));
+        assert_eq!(95437, accumulated_directory_size(TERMINAL_OUTPUT));
     }
 }

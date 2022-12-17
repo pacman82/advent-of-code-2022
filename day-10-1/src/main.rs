@@ -306,8 +306,6 @@ impl Instruction {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::{lines::InputIterator, sum_signal_strength, ClockCircuit, Instruction};
 
     #[test]
@@ -317,7 +315,7 @@ mod tests {
             addx 3\n\
             addx -5\n\
         ";
-        let instructions = InputIterator::new(Cursor::new(input), Instruction::from_line);
+        let instructions = InputIterator::new(input.as_bytes(), Instruction::from_line);
         let mut cc = ClockCircuit::new(instructions);
 
         assert_eq!(1, cc.x());
@@ -484,9 +482,7 @@ mod tests {
             noop\n\
         ";
 
-        let input = Cursor::new(input);
-
-        let sum = sum_signal_strength(input);
+        let sum = sum_signal_strength(input.as_bytes());
 
         assert_eq!(13140, sum);
     }

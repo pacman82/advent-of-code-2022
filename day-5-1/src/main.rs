@@ -184,8 +184,6 @@ impl Instruction {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::top_crates;
 
     #[test]
@@ -202,7 +200,7 @@ mod tests {
             move 1 from 1 to 2\n\
         ";
 
-        let actual = top_crates(Cursor::new(input));
+        let actual = top_crates(input.as_bytes());
 
         assert_eq!("CMZ", actual);
     }

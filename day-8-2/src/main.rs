@@ -195,23 +195,20 @@ impl Index<(usize, usize)> for Grid {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::Grid;
 
-    const INPUT: &str = "\
+    const INPUT: &[u8] = "\
         30373\n\
         25512\n\
         65332\n\
         33549\n\
         35390\n\
-    ";
+    "
+    .as_bytes();
 
     #[test]
     fn view_range() {
-        let input = Cursor::new(INPUT);
-
-        let grid = Grid::new(input);
+        let grid = Grid::new(INPUT);
         let ranges = |r: usize, c: usize| grid.view_range(5 * r + c);
 
         assert_eq!((1, 1, 2, 2), ranges(1, 2));
@@ -220,9 +217,7 @@ mod tests {
 
     #[test]
     fn scenic_scores() {
-        let input = Cursor::new(INPUT);
-
-        let grid = Grid::new(input);
+        let grid = Grid::new(INPUT);
         let score = |r: usize, c: usize| grid.scenic_score(5 * r + c);
 
         assert_eq!(4, score(1, 2));
@@ -231,9 +226,7 @@ mod tests {
 
     #[test]
     fn max_scenic_score() {
-        let input = Cursor::new(INPUT);
-
-        let grid = Grid::new(input);
+        let grid = Grid::new(INPUT);
         let best = grid.best_scenic_score();
 
         assert_eq!(8, best);

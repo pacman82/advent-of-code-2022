@@ -841,11 +841,9 @@ impl Direction {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::num_visited_by_tail;
 
-    const INPUT: &str = "\
+    const INPUT: &[u8] = "\
         R 4\n\
         U 4\n\
         L 3\n\
@@ -854,14 +852,11 @@ mod tests {
         D 1\n\
         L 5\n\
         R 2\n\
-    ";
+    "
+    .as_bytes();
 
     #[test]
     fn number_of_fields_visited() {
-        let input = Cursor::new(INPUT);
-
-        let n = num_visited_by_tail(input);
-
-        assert_eq!(1, n);
+        assert_eq!(1, num_visited_by_tail(INPUT));
     }
 }
