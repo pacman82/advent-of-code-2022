@@ -93,8 +93,7 @@ fn max_calories_in_list(mut list: impl BufRead) -> Result<u64, Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::max_calories_in_list;
-    use std::io::Cursor;
+    use crate::max_calories_in_list; 
 
     #[test]
     fn example_given_in_instruction() {
@@ -112,9 +111,8 @@ mod tests {
             9000\n\
             \n\
             10000";
-        let input = Cursor::new(input);
 
-        let actual = max_calories_in_list(input).unwrap();
+        let actual = max_calories_in_list(input.as_bytes()).unwrap();
 
         assert_eq!(24_000, actual);
     }

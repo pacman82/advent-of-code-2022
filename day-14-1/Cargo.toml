@@ -1,5 +1,5 @@
 [package]
-name = "day-13-2"
+name = "day-14-1"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 atoi = "2.0.0"
+common = { path = "../common"}

@@ -84,6 +84,13 @@ name = "day-13-2"
 version = "0.1.0"
 dependencies = [
  "atoi",
+]
+
+[[package]]
+name = "day-14-1"
+version = "0.1.0"
+dependencies = [
+ "atoi",
  "common",
 ]
 
