@@ -127,7 +127,7 @@ impl Grid {
                     *a >= 0 && *b >= 0 && *a < self.width as isize && *b < grid_height as isize
                 })
                 .map(|(a, b)| *b as usize * self.width + *a as usize)
-                .filter(|n| self.heights[*n] +  1 >= current_height),
+                .filter(|n| self.heights[*n] + 1 >= current_height),
         );
     }
 }

@@ -127,52 +127,102 @@
 //! 1, the second pair has index 2, and so on.) In the above example, the pairs in the right order
 //! are 1, 2, 4, and 6; the sum of these indices is 13. Determine which pairs of packets are already
 //! in the right order. What is the sum of the indices of those pairs?
+//!
+//! --- Part Two ---
+//!
+//! Now, you just need to put all of the packets in the right order. Disregard the blank lines in
+//! your list of received packets. The distress signal protocol also requires that you include two
+//! additional divider packets:
+//!
+//! ```
+//! [[2]]
+//! [[6]]
+//! ```
+//!
+//! Using the same rules as before, organize all packets - the ones in your list of received packets
+//! as well as the two divider packets - into the correct order. For the example above, the result
+//! of putting the packets in the correct order is:
+//!
+//! ```
+//! []
+//! [[]]
+//! [[[]]]
+//! [1,1,3,1,1]
+//! [1,1,5,1,1]
+//! [[1],[2,3,4]]
+//! [1,[2,[3,[4,[5,6,0]]]],8,9]
+//! [1,[2,[3,[4,[5,6,7]]]],8,9]
+//! [[1],4]
+//! [[2]]
+//! [3]
+//! [[4,4],4,4]
+//! [[4,4],4,4,4]
+//! [[6]]
+//! [7,7,7]
+//! [7,7,7,7]
+//! [[8,7,6]]
+//! [9]
+//! ```
+//!
+//! Afterward, locate the divider packets. To find the decoder key for this distress signal, you
+//! need to determine the indices of the two divider packets and multiply them together. (The first
+//! packet is at index 1, the second packet is at index 2, and so on.) In this example, the divider
+//! packets are 10th and 14th, and so the decoder key is 140. Organize all of the packets into the
+//! correct order. **What is the decoder key for the distress signal?**
 
 use std::{
     cmp::{min, Ordering},
-    fs::File,
-    io::{BufRead, BufReader},
+    fs,
 };
 
 use atoi::FromRadix10SignedChecked;
 
-use common::LineStream;
-
 fn main() {
-    let input = BufReader::new(File::open("input.txt").expect("Can not open input file"));
-    let acc = accumulated_pair_indices(input);
+    let input = fs::read("input.txt").expect("Can not open input file");
+    let acc = distress_signal(&input);
     println!("{acc}");
 }
 
-fn accumulated_pair_indices(input: impl BufRead) -> usize {
-    // 3 Lines + one blank
-    let mut lines = LineStream::with_num_lines(input, 3);
-    let mut index = 0;
-    let mut acc = 0;
-    loop {
-        index += 1;
-        if let Some(pair) = lines.next_line() {
-            if is_in_correct_order(pair) {
-                acc += index;
-            }
-        } else {
-            break;
-        }
-    }
-    acc
+fn distress_signal(input: &[u8]) -> usize {
+    const START_DIVIDER: &[u8] = b"[[2]]";
+    const END_DIVIDER: &[u8] = b"[[6]]";
+
+    let mut packets: Vec<_> = input
+        .split(|c| *c == b'\n')
+        .filter(|slice| !slice.is_empty())
+        .chain([START_DIVIDER, END_DIVIDER])
+        .map(Line::from_line)
+        .collect();
+    // Sorting is actually way too much work. Only two packets would be needed to be in the correct
+    // position.
+    packets.sort();
+    let start_divider = packets
+        .binary_search(&Line::from_line(START_DIVIDER))
+        .expect("Start divider must be in input.");
+    let end_divider = packets
+        .binary_search(&Line::from_line(END_DIVIDER))
+        .expect("End divider must be in input");
+    (start_divider + 1) * (end_divider + 1)
 }
 
-fn is_in_correct_order(pair: &[u8]) -> bool {
-    let mut splitted = pair.split(|byte| *byte == b'\n');
-    let first = Line::from_line(splitted.next().unwrap());
-    let second = Line::from_line(splitted.next().unwrap());
-    first.can_be_in_front_of(second)
-}
-
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy)]
 enum Line<'a> {
     List(&'a [u8]),
     Integer(i32),
+}
+
+impl PartialEq for Line<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other).is_eq()
+    }
+}
+
+impl Eq for Line<'_> {}
+
+impl<'a> Ord for Line<'a> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
+    }
 }
 
 impl<'a> Line<'a> {
@@ -183,10 +233,6 @@ impl<'a> Line<'a> {
             let (n, _) = i32::from_radix_10_signed_checked(bytes);
             Line::Integer(n.unwrap())
         }
-    }
-
-    fn can_be_in_front_of(self, rhs: Line) -> bool {
-        self <= rhs
     }
 
     fn pop_front(&mut self) -> Option<Self> {
@@ -264,21 +310,5 @@ impl PartialOrd for Line<'_> {
             (a @ Line::Integer(_), b @ Line::List(_)) => b.partial_cmp(&a).map(Ordering::reverse),
             (Line::Integer(x), Line::Integer(y)) => Some(x.cmp(&y)),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::is_in_correct_order;
-
-    #[test]
-    fn packet_orders() {
-        assert!(is_in_correct_order(b"[1,1,3,1,1]\n[1,1,5,1,1]\n"));
-        assert!(is_in_correct_order(b"[[1],[2,3,4]]\n[[1],4]\n"));
-        assert!(!is_in_correct_order(b"[9]\n[[8,7,6]]\n"));
-        assert!(is_in_correct_order(b"[[4,4],4,4]\n[[4,4],4,4,4]\n"));
-        assert!(!is_in_correct_order(b"[7,7,7,7]\n[7,7,7]\n"));
-        assert!(is_in_correct_order(b"[]\n[3]\n"));
-        assert!(!is_in_correct_order(b"[[[]]]\n[[]]\n"));
     }
 }

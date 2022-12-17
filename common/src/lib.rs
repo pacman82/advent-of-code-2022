@@ -60,6 +60,8 @@ where
     type Item = I;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.lines.next_line().map(|line| (self.line_to_input)(line))
+        self.lines
+            .next_line()
+            .map(|line| (self.line_to_input)(line))
     }
 }
