@@ -95,6 +95,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "day-14-2"
+version = "0.1.0"
+dependencies = [
+ "atoi",
+ "common",
+]
+
+[[package]]
 name = "day-2-1"
 version = "0.1.0"
 dependencies = [
