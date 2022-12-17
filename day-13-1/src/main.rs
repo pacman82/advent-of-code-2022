@@ -129,8 +129,9 @@
 //! in the right order. What is the sum of the indices of those pairs?
 
 use std::{
+    cmp::{Ordering, min},
     fs::File,
-    io::{BufRead, BufReader}, cmp::Ordering,
+    io::{BufRead, BufReader},
 };
 
 use atoi::FromRadix10SignedChecked;
@@ -169,15 +170,15 @@ fn is_in_correct_order(pair: &[u8]) -> bool {
 }
 
 #[derive(Clone, Copy, PartialEq)]
-enum Line<'a>{
+enum Line<'a> {
     List(&'a [u8]),
-    Integer(i32)
+    Integer(i32),
 }
 
 impl<'a> Line<'a> {
     pub fn from_line(bytes: &'a [u8]) -> Self {
         if bytes[0] == b'[' {
-            Line::List(&bytes[1..(bytes.len() -1)])
+            Line::List(&bytes[1..(bytes.len() - 1)])
         } else {
             let (n, _) = i32::from_radix_10_signed_checked(bytes);
             Line::Integer(n.unwrap())
@@ -190,10 +191,29 @@ impl<'a> Line<'a> {
 
     fn pop_front(&mut self) -> Option<Self> {
         if let Line::List(bytes) = self {
-            let split = bytes.iter().position(|byte| *byte == b',');
-            let front = &bytes[0..split.unwrap_or(bytes.len())];
-            *bytes= &bytes[split.map(|pos| pos + 1).unwrap_or(bytes.len())..];
-            if front.is_empty(){
+            let split_at = bytes.iter().scan(0, |nesting, c| {
+                match c {
+                    b'[' => { 
+                        *nesting += 1;
+                        Some(())
+                    }
+                    b']' => {
+                        *nesting -= 1;
+                        Some(())
+                    }
+                    b',' => {
+                        if *nesting == 0 {
+                            None
+                        } else {
+                            Some(())
+                        }
+                    }
+                    _ => Some(())
+                }
+            }).count();
+            let front = &bytes[0..split_at];
+            *bytes = &bytes[min(split_at + 1, bytes.len())..];
+            if front.is_empty() {
                 None
             } else {
                 Some(Line::from_line(front))
@@ -214,19 +234,31 @@ impl PartialOrd for Line<'_> {
                     (None, None) => Some(Ordering::Equal),
                     (None, Some(_)) => Some(Ordering::Less),
                     (Some(_), None) => Some(Ordering::Greater),
-                    (Some(x), Some(y)) => {
-                        x.partial_cmp(&y).and_then(|ord| {
-                            if ord == Ordering::Equal {
-                                a.partial_cmp(&b)
-                            } else {
-                                Some(ord)
-                            }
-                        })
-                    }
+                    (Some(x), Some(y)) => x.partial_cmp(&y).and_then(|ord| {
+                        if ord == Ordering::Equal {
+                            a.partial_cmp(&b)
+                        } else {
+                            Some(ord)
+                        }
+                    }),
                 }
-            },
-            (Line::List(list), Line::Integer(n)) => todo!(),
-            (Line::Integer(_), Line::List(_)) => todo!(),
+            }
+            (mut list @ Line::List(_), b @ Line::Integer(_n)) => {
+                let a = list.pop_front();
+                if let Some(a) = a {
+                    Some(match a.partial_cmp(&b).unwrap() {
+                        ord @ (Ordering::Less | Ordering::Greater) => ord,
+                        Ordering::Equal => if list.pop_front().is_some(){
+                            Ordering::Greater
+                        } else {
+                            Ordering::Equal
+                        }
+                    })
+                } else {
+                    Some(Ordering::Less)
+                }
+            }
+            (a @ Line::Integer(_), b @ Line::List(_)) => b.partial_cmp(&a).map(Ordering::reverse),
             (Line::Integer(x), Line::Integer(y)) => Some(x.cmp(&y)),
         }
     }
@@ -238,7 +270,12 @@ mod tests {
 
     #[test]
     fn packet_orders() {
-        // assert!(is_in_correct_order(b"[1,1,3,1,1]\n[1,1,5,1,1]\n"));
+        assert!(is_in_correct_order(b"[1,1,3,1,1]\n[1,1,5,1,1]\n"));
         assert!(is_in_correct_order(b"[[1],[2,3,4]]\n[[1],4]\n"));
+        assert!(!is_in_correct_order(b"[9]\n[[8,7,6]]\n"));
+        assert!(is_in_correct_order(b"[[4,4],4,4]\n[[4,4],4,4,4]\n"));
+        assert!(!is_in_correct_order(b"[7,7,7,7]\n[7,7,7]\n"));
+        assert!(is_in_correct_order(b"[]\n[3]\n"));
+        assert!(!is_in_correct_order(b"[[[]]]\n[[]]\n"));
     }
 }
